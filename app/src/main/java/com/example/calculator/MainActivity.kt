@@ -1,19 +1,19 @@
 package com.example.calculator
 
-import android.annotation.SuppressLint
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.widget.TextView
 import kotlinx.android.synthetic.main.activity_main.*
+import java.text.DecimalFormat
 
 class MainActivity : AppCompatActivity() {
 
     private val currentInputSB = StringBuilder()
     // Create the list to store numbers and operators.
     private val list = mutableListOf<Any>()
-    // Clear the string builder if the number input is finished,
+    // `isNumberStarted` is true create a number element of list,
     // otherwise update the number.
     private var isNumberStarted = true
 
@@ -33,6 +33,7 @@ class MainActivity : AppCompatActivity() {
             isNumberStarted = false
         } else {
             currentInputSB.append(tv.text)
+            // Can also be written like this:
             //numbersList.removeLast()
             //numbersList.add(currentInputSB.toString().toInt())
             list[list.size - 1] = currentInputSB.toString().toInt()
@@ -50,7 +51,18 @@ class MainActivity : AppCompatActivity() {
 
     fun equalButtonClick(view: View) {
         // Grammar check
+        // preset error info
         val errorInfo = "ERROR"
+        // check `number operator number operator ... number` structure
+        // feature: even -> number; odd -> operator; last -> number
+        if (list.size == 0) {
+            resultTextView.text = errorInfo
+            return
+        }
+        if (list.last() !is Number) {
+            resultTextView.text = errorInfo
+            return
+        }
         for (i in list.indices) {
             if (i % 2 == 0) {
                 if (list[i] !is Number) {
@@ -65,82 +77,81 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        val newList = list
-        var result = 0.0f
+
+        var result = 0.0
 
         // Handling multiplication and division
         // Store multiplication and division symbol indices in list
         val mulAndDivIndicesList = mutableListOf<Int>()
-        for ( (i,e) in list.withIndex() ) {
+        for ( (i,e) in this.list.withIndex() ) {
             if ( e == "×" || e == "÷") {
                 mulAndDivIndicesList.add(i)
             }
         }
 
         for ( (i, index) in mulAndDivIndicesList.withIndex() ) {
+            // Turn 3 elements to a element after every operation,
+            // so indices need to minus 2.
             val relativeIndex = index - i * 2
-            when (newList[relativeIndex]) {
+            when (list[relativeIndex]) {
                 "×" -> {
-                    result = (newList[relativeIndex-1] as Number).toFloat() * (newList[relativeIndex+1] as Number).toFloat()
-                    newList[relativeIndex-1] = result
-                    newList.removeAt(relativeIndex)
-                    newList.removeAt(relativeIndex)
+                    result = (list[relativeIndex-1] as Number).toDouble() * (list[relativeIndex+1] as Number).toDouble()
+                    // Please pay attention to index changes.
+                    list[relativeIndex-1] = result
+                    list.removeAt(relativeIndex)
+                    list.removeAt(relativeIndex)
                 }
                 "÷" -> {
-                    result = (newList[relativeIndex-1] as Number).toFloat() / (newList[relativeIndex+1] as Number).toFloat()
-                    newList[relativeIndex-1] = result
-                    newList.removeAt(relativeIndex)
-                    newList.removeAt(relativeIndex)
+                    result = (list[relativeIndex-1] as Number).toDouble() / (list[relativeIndex+1] as Number).toDouble()
+                    list[relativeIndex-1] = result
+                    list.removeAt(relativeIndex)
+                    list.removeAt(relativeIndex)
                 }
             }
         }
 
         // Handling addition and subtraction
-        val addAndSubIndicesList = mutableListOf<Int>()
-        for ( (i,e) in list.withIndex() ) {
-            if ( e == "+" || e == "-") {
-                addAndSubIndicesList.add(i)
-            }
-        }
-
-        for ( (i, index) in addAndSubIndicesList.withIndex() ) {
-            val relativeIndex = index - i * 2
-            when (newList[relativeIndex]) {
+        for ( i in 1 until list.size step 2 ) {
+            when (list[i]) {
                 "+" -> {
-                    result = (newList[relativeIndex-1] as Number).toFloat() + (newList[relativeIndex+1] as Number).toFloat()
-                    newList[relativeIndex-1] = result
-                    newList.removeAt(relativeIndex)
-                    newList.removeAt(relativeIndex)
+                    result = (list[i-1] as Number).toDouble() + (list[i+1] as Number).toDouble()
+                    list[i-1] = result
+                    list.removeAt(i)
+                    list.removeAt(i)
                 }
                 "-" -> {
-                    result = (newList[relativeIndex-1] as Number).toFloat() - (newList[relativeIndex+1] as Number).toFloat()
-                    newList[relativeIndex-1] = result
-                    newList.removeAt(relativeIndex)
-                    newList.removeAt(relativeIndex)
+                    result = (list[i-1] as Number).toDouble() - (list[i+1] as Number).toDouble()
+                    list[i-1] = result
+                    list.removeAt(i)
+                    list.removeAt(i)
                 }
             }
         }
 
-        resultTextView.text = result.toString()
+        // Format decimal :)
+        val dec = DecimalFormat("#,###.#")
+        resultTextView.text = dec.format(result)
     }
 
     fun backButtonClick(view: View) {
         // determine to withdraw the number or the operator
-        currentInputSB.append(list.last())
         if (list.size == 0){
             return
         }
         list.removeLast()
-        if (list.last() is Number) {
+        if (list.size > 0 && list.last() is Number) {
             currentInputSB.append(list.last())
             isNumberStarted = false
+        } else {
+            isNumberStarted = true
         }
         showProcess()
     }
 
     fun clearButtonClick(view: View) {
-        // clear the process text view  content
+        // restore the process and result text view content
         processTextView.text = ""
+        resultTextView.text = "0"
         // clear the list
         currentInputSB.clear()
         list.clear()
@@ -156,8 +167,8 @@ class MainActivity : AppCompatActivity() {
         processTextView.text = str.toString()
     }
 
-    fun debugLog(view: View) {
-        Log.v("myTag", "$list")
-        Log.v("myTag", "$isNumberStarted")
+    fun toBeDeveloped(view: View) {
+        val author = "Author: Liming, to be developed"
+        resultTextView.text = author
     }
 }

@@ -17,14 +17,6 @@ class ExampleUnitTest {
         list.add("hello")
         list.add(100)
         list.add(1.11f)
-        //list[1] = list[2]
-        println(list[1] as Int)
-        //println(list[1] as Int + (list[2] as Float).toInt())
-    }
-    @Test
-    fun toIntOfList() {
-        val list = mutableListOf<Number>()
-        list.add(111)
-        list[0].toInt()
+        println(list)
     }
 }
