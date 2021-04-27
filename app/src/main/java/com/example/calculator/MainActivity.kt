@@ -1,5 +1,6 @@
 package com.example.calculator
 
+import android.annotation.SuppressLint
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
@@ -10,9 +11,8 @@ import kotlinx.android.synthetic.main.activity_main.*
 class MainActivity : AppCompatActivity() {
 
     private val currentInputSB = StringBuilder()
-    // Note this your number must less than 2^32 because of Int
-    private val numbersList = mutableListOf<Int>()
-    private val operatorsList = mutableListOf<String>()
+    // Create the list to store numbers and operators.
+    private val list = mutableListOf<Any>()
     // Clear the string builder if the number input is finished,
     // otherwise update the number.
     private var isNumberStarted = true
@@ -25,46 +25,115 @@ class MainActivity : AppCompatActivity() {
     fun numberButtonClick(view: View) {
         // convert Text to TextView
         val tv = view as TextView
-        currentInputSB.append(tv.text)
 
         if (isNumberStarted) {
-            numbersList.add(tv.text.toString().toInt())
+            currentInputSB.clear()
+            currentInputSB.append(tv.text)
+            list.add(tv.text.toString().toInt())
             isNumberStarted = false
         } else {
-            numbersList[numbersList.size - 1] = currentInputSB.toString().toInt()
+            currentInputSB.append(tv.text)
             //numbersList.removeLast()
             //numbersList.add(currentInputSB.toString().toInt())
+            list[list.size - 1] = currentInputSB.toString().toInt()
         }
-        //Log.v("myTag", "$numbersList")
         showProcess()
     }
+
     fun operatorButtonClick(view: View) {
         val tv = view as TextView
-        operatorsList.add(tv.text.toString())
-        isNumberStarted = true
         currentInputSB.clear()
-        //Log.v("myTag", "$operatorsList")
+        list.add(tv.text.toString())
+        isNumberStarted = true
         showProcess()
     }
 
     fun equalButtonClick(view: View) {
-        Log.v("button-test","equal")
+        // Grammar check
+        val errorInfo = "ERROR"
+        for (i in list.indices) {
+            if (i % 2 == 0) {
+                if (list[i] !is Number) {
+                    resultTextView.text = errorInfo
+                    return
+                }
+            } else {
+                if (list[i] !is String) {
+                    resultTextView.text = errorInfo
+                    return
+                }
+            }
+        }
+
+        val newList = list
+        var result = 0.0f
+
+        // Handling multiplication and division
+        // Store multiplication and division symbol indices in list
+        val mulAndDivIndicesList = mutableListOf<Int>()
+        for ( (i,e) in list.withIndex() ) {
+            if ( e == "×" || e == "÷") {
+                mulAndDivIndicesList.add(i)
+            }
+        }
+
+        for ( (i, index) in mulAndDivIndicesList.withIndex() ) {
+            val relativeIndex = index - i * 2
+            when (newList[relativeIndex]) {
+                "×" -> {
+                    result = (newList[relativeIndex-1] as Number).toFloat() * (newList[relativeIndex+1] as Number).toFloat()
+                    newList[relativeIndex-1] = result
+                    newList.removeAt(relativeIndex)
+                    newList.removeAt(relativeIndex)
+                }
+                "÷" -> {
+                    result = (newList[relativeIndex-1] as Number).toFloat() / (newList[relativeIndex+1] as Number).toFloat()
+                    newList[relativeIndex-1] = result
+                    newList.removeAt(relativeIndex)
+                    newList.removeAt(relativeIndex)
+                }
+            }
+        }
+
+        // Handling addition and subtraction
+        val addAndSubIndicesList = mutableListOf<Int>()
+        for ( (i,e) in list.withIndex() ) {
+            if ( e == "+" || e == "-") {
+                addAndSubIndicesList.add(i)
+            }
+        }
+
+        for ( (i, index) in addAndSubIndicesList.withIndex() ) {
+            val relativeIndex = index - i * 2
+            when (newList[relativeIndex]) {
+                "+" -> {
+                    result = (newList[relativeIndex-1] as Number).toFloat() + (newList[relativeIndex+1] as Number).toFloat()
+                    newList[relativeIndex-1] = result
+                    newList.removeAt(relativeIndex)
+                    newList.removeAt(relativeIndex)
+                }
+                "-" -> {
+                    result = (newList[relativeIndex-1] as Number).toFloat() - (newList[relativeIndex+1] as Number).toFloat()
+                    newList[relativeIndex-1] = result
+                    newList.removeAt(relativeIndex)
+                    newList.removeAt(relativeIndex)
+                }
+            }
+        }
+
+        resultTextView.text = result.toString()
     }
 
     fun backButtonClick(view: View) {
         // determine to withdraw the number or the operator
-        if (numbersList.size == 0){
+        currentInputSB.append(list.last())
+        if (list.size == 0){
             return
         }
-        if(numbersList.size > operatorsList.size) {
-            // withdraw the last number of numbersList
-            numbersList.removeLast()
-            isNumberStarted = true
-            currentInputSB.clear()
-        } else {
-            operatorsList.removeLast()
+        list.removeLast()
+        if (list.last() is Number) {
+            currentInputSB.append(list.last())
             isNumberStarted = false
-            currentInputSB.append(numbersList.last())
         }
         showProcess()
     }
@@ -72,52 +141,23 @@ class MainActivity : AppCompatActivity() {
     fun clearButtonClick(view: View) {
         // clear the process text view  content
         processTextView.text = ""
-        // clear the string builder
+        // clear the list
         currentInputSB.clear()
-        numbersList.clear()
-        operatorsList.clear()
+        list.clear()
         isNumberStarted = true
-        Log.v("myTag", "$numbersList")
-        Log.v("myTag", "$operatorsList")
     }
 
     // Concatenate numbers and operators, and display them in `processTextView`
     private fun showProcess() {
-        var str = StringBuilder()
-        for((i, number) in numbersList.withIndex()) {
-            str.append(number)
-            // determine whether the operator exists
-            if (operatorsList.size > i) {
-                str.append(" ${operatorsList[i]} ")
-            }
+        val str = StringBuilder()
+        for(e in list) {
+            str.append("$e ")
         }
         processTextView.text = str.toString()
     }
 
-    // Complete logic operation
-    fun calculate1() {
-        if (numbersList.size == 0 ) {
-            return
-        }
-        var i = 0
-        var param1 = numbersList[0]
-        var param2 = 0
-        var result = 0.0f
-        while (true) {
-            var operator = operatorsList[i]
-            if (operator == "×" || operator == "÷") {
-                param2 = numbersList[i+1]
-                when(operator) {
-                    "×" -> { result = (param1 * param2) as Float }
-                    "÷" -> { result = (param1 / param2) as Float }
-                }
-            }
-        }
-    }
-
     fun debugLog(view: View) {
-        Log.v("mytag", "$numbersList")
-        Log.v("mytag", "$operatorsList")
-        Log.v("mytag", "$isNumberStarted")
+        Log.v("myTag", "$list")
+        Log.v("myTag", "$isNumberStarted")
     }
 }
