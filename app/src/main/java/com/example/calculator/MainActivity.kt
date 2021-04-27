@@ -55,11 +55,7 @@ class MainActivity : AppCompatActivity() {
         val errorInfo = "ERROR"
         // check `number operator number operator ... number` structure
         // feature: even -> number; odd -> operator; last -> number
-        if (list.size == 0) {
-            resultTextView.text = errorInfo
-            return
-        }
-        if (list.last() !is Number) {
+        if (list.size == 0 || list.last() !is Number) {
             resultTextView.text = errorInfo
             return
         }
@@ -128,8 +124,11 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
+        currentInputSB.clear()
+
         // Format decimal :)
-        val dec = DecimalFormat("#,###.#")
+        // add thousand separator and omit decimal 0
+        val dec = DecimalFormat("#,###.###")
         resultTextView.text = dec.format(result)
     }
 
@@ -161,14 +160,21 @@ class MainActivity : AppCompatActivity() {
     // Concatenate numbers and operators, and display them in `processTextView`
     private fun showProcess() {
         val str = StringBuilder()
-        for(e in list) {
-            str.append("$e ")
+        val dec = DecimalFormat("#,###.###")
+        for(i in list.indices) {
+            if (i%2 == 0){
+                val formatNumber = dec.format(list[i] as Number)
+                str.append("$formatNumber ")
+            } else {
+                str.append("${list[i]} ")
+            }
         }
         processTextView.text = str.toString()
     }
 
     fun toBeDeveloped(view: View) {
-        val author = "Author: Liming, to be developed"
+        val author = "Author: Liming\nto be developed"
         resultTextView.text = author
+        Log.v("myTag", "$list")
     }
 }
