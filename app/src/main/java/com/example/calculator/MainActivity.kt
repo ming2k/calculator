@@ -59,6 +59,7 @@ class MainActivity : AppCompatActivity() {
         }
         if (list.last() !is Number) {
             resultTextView.text = getString(R.string.error_info2)
+            return
         }
         for (i in list.indices) {
             if ( (i % 2 == 0 && list[i] !is Number) || (i % 2 == 1 && list[i] !is String)) {
@@ -69,6 +70,12 @@ class MainActivity : AppCompatActivity() {
 
 
         var result = 0.0
+
+        // When only one number,
+        // the result should be equal to the number.
+        if (list.size == 1) {
+            result = (list[0] as Number).toDouble()
+        }
 
         // Handling multiplication and division
         // Store multiplication and division symbol indices in list
