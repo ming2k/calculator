@@ -51,25 +51,19 @@ class MainActivity : AppCompatActivity() {
 
     fun equalButtonClick(view: View) {
         // Grammar check
-        // preset error info
-        val errorInfo = "ERROR"
         // check `number operator number operator ... number` structure
         // feature: even -> number; odd -> operator; last -> number
-        if (list.size == 0 || list.last() !is Number) {
-            resultTextView.text = errorInfo
+        if (list.size == 0 ) {
+            resultTextView.text = getString(R.string.error_info1)
             return
         }
+        if (list.last() !is Number) {
+            resultTextView.text = getString(R.string.error_info2)
+        }
         for (i in list.indices) {
-            if (i % 2 == 0) {
-                if (list[i] !is Number) {
-                    resultTextView.text = errorInfo
+            if ( (i % 2 == 0 && list[i] !is Number) || (i % 2 == 1 && list[i] !is String)) {
+                    resultTextView.text = getString(R.string.error_info3)
                     return
-                }
-            } else {
-                if (list[i] !is String) {
-                    resultTextView.text = errorInfo
-                    return
-                }
             }
         }
 
@@ -108,18 +102,18 @@ class MainActivity : AppCompatActivity() {
 
         // Handling addition and subtraction
         for ( i in 1 until list.size step 2 ) {
-            when (list[i]) {
+            when (list[1]) {
                 "+" -> {
-                    result = (list[i-1] as Number).toDouble() + (list[i+1] as Number).toDouble()
-                    list[i-1] = result
-                    list.removeAt(i)
-                    list.removeAt(i)
+                    result = (list[0] as Number).toDouble() + (list[2] as Number).toDouble()
+                    list[0] = result
+                    list.removeAt(1)
+                    list.removeAt(1)
                 }
                 "-" -> {
-                    result = (list[i-1] as Number).toDouble() - (list[i+1] as Number).toDouble()
-                    list[i-1] = result
-                    list.removeAt(i)
-                    list.removeAt(i)
+                    result = (list[0] as Number).toDouble() - (list[2] as Number).toDouble()
+                    list[0] = result
+                    list.removeAt(1)
+                    list.removeAt(1)
                 }
             }
         }
@@ -130,6 +124,17 @@ class MainActivity : AppCompatActivity() {
         // add thousand separator and omit decimal 0
         val dec = DecimalFormat("#,###.###")
         resultTextView.text = dec.format(result)
+
+        /**
+         * please note that:
+         * Under normal conditions, the `isNumberStarted` is false,
+         * It's good after clicking equal button,
+         * because at last the `list` only have only one element,
+         * if you click operator button, the element can continue to use,
+         * if you click number button, the result will be covered by new one.
+         * So it can be better to use.
+         */
+
     }
 
     fun backButtonClick(view: View) {
@@ -162,7 +167,7 @@ class MainActivity : AppCompatActivity() {
         val str = StringBuilder()
         val dec = DecimalFormat("#,###.###")
         for(i in list.indices) {
-            if (i%2 == 0){
+            if (i%2 == 0 && list[i] is Number){
                 val formatNumber = dec.format(list[i] as Number)
                 str.append("$formatNumber ")
             } else {
@@ -173,7 +178,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun toBeDeveloped(view: View) {
-        val author = "Author: Liming\nto be developed"
+        val author = getString(R.string.to_be_developed)
         resultTextView.text = author
         Log.v("myTag", "$list")
     }
