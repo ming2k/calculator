@@ -19,4 +19,11 @@ class ExampleUnitTest {
         list.add(1.11f)
         println(list)
     }
+    @Test
+    fun divideByZero() {
+        val a = 1.0
+        val b = 0.0
+        val c = a/b
+        println( c )
+    }
 }

@@ -3,5 +3,6 @@
     <string name="error_info1">Error\nLength is zero.</string>
     <string name="error_info2">Error\nNumber isn\'t last.</string>
     <string name="error_info3">Error\nIncorrect structure.</string>
+    <string name="error_info4">Error\nDivided by zero.</string>
     <string name="to_be_developed">Author:LiMing\nto be developed</string>
 </resources>

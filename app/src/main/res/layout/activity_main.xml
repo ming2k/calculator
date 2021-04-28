@@ -159,6 +159,7 @@
         android:layout_height="wrap_content"
         android:background="@drawable/round_shape"
         android:gravity="center"
+        android:onClick="dotButtonClick"
         android:text="."
         android:textColor="#FFFFFF"
         android:textSize="20sp"

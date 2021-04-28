@@ -10,12 +10,21 @@ import java.text.DecimalFormat
 
 class MainActivity : AppCompatActivity() {
 
+    /**
+     * Remember to update the status of following variable after operating
+     * This is important!
+     */
+
     private val currentInputSB = StringBuilder()
     // Create the list to store numbers and operators.
     private val list = mutableListOf<Any>()
     // `isNumberStarted` is true create a number element of list,
     // otherwise update the number.
     private var isNumberStarted = true
+    // Determine whether the dot button is clicked
+    // Decide whether to display.
+    // Prevent multiple dots from being written
+    private var isDotButtonClicked = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -23,20 +32,41 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun numberButtonClick(view: View) {
-        // convert Text to TextView
+        // Convert Text to TextView
         val tv = view as TextView
+        isDotButtonClicked = false
 
         if (isNumberStarted) {
             currentInputSB.clear()
             currentInputSB.append(tv.text)
-            list.add(tv.text.toString().toInt())
+            list.add(tv.text.toString().toDouble())
             isNumberStarted = false
         } else {
             currentInputSB.append(tv.text)
-            // Can also be written like this:
-            //numbersList.removeLast()
-            //numbersList.add(currentInputSB.toString().toInt())
-            list[list.size - 1] = currentInputSB.toString().toInt()
+            list[list.size - 1] = currentInputSB.toString().toDouble()
+        }
+        showProcess()
+    }
+
+    fun dotButtonClick(view: View) {
+        val tv = view as TextView
+        // Prevent multiple dots from being written
+        if (isDotButtonClicked) {
+            return
+        } else {
+            isDotButtonClicked = true
+            if (isNumberStarted) {
+                currentInputSB.clear()
+                currentInputSB.append("0" + tv.text)
+                list.add(0.0)
+                isNumberStarted = false
+            } else {
+                currentInputSB.append(tv.text)
+                // Can also be written like this:
+                //numbersList.removeLast()
+                //numbersList.add(currentInputSB.toString().toInt())
+                list[list.size - 1] = currentInputSB.toString().toDouble()
+            }
         }
         showProcess()
     }
@@ -46,6 +76,7 @@ class MainActivity : AppCompatActivity() {
         currentInputSB.clear()
         list.add(tv.text.toString())
         isNumberStarted = true
+        isDotButtonClicked = false
         showProcess()
     }
 
@@ -92,14 +123,20 @@ class MainActivity : AppCompatActivity() {
             val relativeIndex = index - i * 2
             when (list[relativeIndex]) {
                 "×" -> {
-                    result = (list[relativeIndex-1] as Number).toDouble() * (list[relativeIndex+1] as Number).toDouble()
+                    result = list[relativeIndex-1] as Double * list[relativeIndex+1] as Double
                     // Please pay attention to index changes.
                     list[relativeIndex-1] = result
                     list.removeAt(relativeIndex)
                     list.removeAt(relativeIndex)
                 }
                 "÷" -> {
-                    result = (list[relativeIndex-1] as Number).toDouble() / (list[relativeIndex+1] as Number).toDouble()
+                    if (list[relativeIndex+1] == 0.0) {
+                        resultTextView.text = getString(R.string.error_info4)
+                        list.clear()
+                        currentInputSB.clear()
+                        return
+                    }
+                    result = list[relativeIndex-1] as Double / list[relativeIndex+1] as Double
                     list[relativeIndex-1] = result
                     list.removeAt(relativeIndex)
                     list.removeAt(relativeIndex)
@@ -111,13 +148,13 @@ class MainActivity : AppCompatActivity() {
         for ( i in 1 until list.size step 2 ) {
             when (list[1]) {
                 "+" -> {
-                    result = (list[0] as Number).toDouble() + (list[2] as Number).toDouble()
+                    result = list[0] as Double + list[2] as Double
                     list[0] = result
                     list.removeAt(1)
                     list.removeAt(1)
                 }
                 "-" -> {
-                    result = (list[0] as Number).toDouble() - (list[2] as Number).toDouble()
+                    result = list[0] as Double - list[2] as Double
                     list[0] = result
                     list.removeAt(1)
                     list.removeAt(1)
@@ -125,11 +162,17 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
+        // The `isNumberStarted` is false is necessary,
+        // After you click equal button, you will click number or operator.
+        // You click number means you don't want to use result,
+        // and you click operator means you want use result to calculate.
+        isNumberStarted = false
+        isDotButtonClicked = false
         currentInputSB.clear()
 
         // Format decimal :)
         // add thousand separator and omit decimal 0
-        val dec = DecimalFormat("#,###.###")
+        val dec = DecimalFormat("#,###.########")
         resultTextView.text = dec.format(result)
 
         /**
@@ -156,6 +199,7 @@ class MainActivity : AppCompatActivity() {
         } else {
             isNumberStarted = true
         }
+        isDotButtonClicked = false
         showProcess()
     }
 
@@ -163,20 +207,25 @@ class MainActivity : AppCompatActivity() {
         // restore the process and result text view content
         processTextView.text = ""
         resultTextView.text = "0"
-        // clear the list
         currentInputSB.clear()
+        // clear the list
         list.clear()
+        isDotButtonClicked = false
         isNumberStarted = true
     }
 
     // Concatenate numbers and operators, and display them in `processTextView`
     private fun showProcess() {
         val str = StringBuilder()
-        val dec = DecimalFormat("#,###.###")
+        val dec = DecimalFormat("#,###.########")
         for(i in list.indices) {
             if (i%2 == 0 && list[i] is Number){
                 val formatNumber = dec.format(list[i] as Number)
-                str.append("$formatNumber ")
+                if (isDotButtonClicked) {
+                    str.append("$formatNumber. ")
+                } else {
+                    str.append("$formatNumber ")
+                }
             } else {
                 str.append("${list[i]} ")
             }
