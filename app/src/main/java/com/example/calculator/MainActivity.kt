@@ -218,18 +218,18 @@ class MainActivity : AppCompatActivity() {
     private fun showProcess() {
         val str = StringBuilder()
         val dec = DecimalFormat("#,###.########")
-        for(i in list.indices) {
-            if (i%2 == 0 && list[i] is Number){
-                val formatNumber = dec.format(list[i] as Number)
+        for(e in list) {
+            if (e is Number){
+                val formatNumber = dec.format(e as Number)
                 // If the dot button is clicked,
                 // the dot should be added after the last element
-                if (isDotButtonClicked && i == list.size-1) {
+                if (isDotButtonClicked && e == list.last()) {
                     str.append("$formatNumber. ")
                 } else {
                     str.append("$formatNumber ")
                 }
             } else {
-                str.append("${list[i]} ")
+                str.append("$e ")
             }
         }
         processTextView.text = str.toString()
