@@ -221,7 +221,9 @@ class MainActivity : AppCompatActivity() {
         for(i in list.indices) {
             if (i%2 == 0 && list[i] is Number){
                 val formatNumber = dec.format(list[i] as Number)
-                if (isDotButtonClicked) {
+                // If the dot button is clicked,
+                // the dot should be added after the last element
+                if (isDotButtonClicked && i == list.size-1) {
                     str.append("$formatNumber. ")
                 } else {
                     str.append("$formatNumber ")
