@@ -5,16 +5,17 @@ import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.widget.TextView
-import kotlinx.android.synthetic.main.activity_main.*
 import java.text.DecimalFormat
 
 class MainActivity : AppCompatActivity() {
+
+    private lateinit var resultTextView : TextView
+    private lateinit var processTextView : TextView
 
     /**
      * Remember to update the status of following variable after operating
      * This is important!
      */
-
     private val currentInputSB = StringBuilder()
     // Create the list to store numbers and operators.
     private val list = mutableListOf<Any>()
@@ -29,9 +30,66 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        processTextView = findViewById<TextView>(R.id.processTextView)
+        resultTextView = findViewById<TextView>(R.id.resultTextView)
+        findViewById<TextView>(R.id.clearButton).setOnClickListener {
+            clearButtonClick(it);
+        }
+        findViewById<TextView>(R.id.signButton).setOnClickListener {
+            toBeDeveloped(it);
+        }
+        findViewById<TextView>(R.id.remainderButton).setOnClickListener {
+            toBeDeveloped(it);
+        }
+        findViewById<TextView>(R.id.divideButton).setOnClickListener {
+            operatorButtonClick(it)
+        }
+        findViewById<TextView>(R.id.multiplyButton).setOnClickListener {
+            operatorButtonClick(it)
+        }
+        findViewById<TextView>(R.id.plusButton).setOnClickListener {
+            operatorButtonClick(it)
+        }
+        findViewById<TextView>(R.id.minusButton).setOnClickListener {
+            operatorButtonClick(it)
+        }
+        findViewById<TextView>(R.id.equalButton).setOnClickListener {
+            equalButtonClick(it)
+        }
+        findViewById<TextView>(R.id.buttonZero).setOnClickListener {
+            numberButtonClick(it)
+        }
+        findViewById<TextView>(R.id.buttonOne).setOnClickListener {
+            numberButtonClick(it)
+        }
+        findViewById<TextView>(R.id.buttonTwo).setOnClickListener {
+            numberButtonClick(it)
+        }
+        findViewById<TextView>(R.id.buttonThree).setOnClickListener {
+            numberButtonClick(it)
+        }
+        findViewById<TextView>(R.id.buttonFour).setOnClickListener {
+            numberButtonClick(it)
+        }
+        findViewById<TextView>(R.id.buttonFive).setOnClickListener {
+            numberButtonClick(it)
+        }
+        findViewById<TextView>(R.id.buttonSix).setOnClickListener {
+            numberButtonClick(it)
+        }
+        findViewById<TextView>(R.id.buttonSeven).setOnClickListener {
+            numberButtonClick(it)
+        }
+        findViewById<TextView>(R.id.buttonEight).setOnClickListener {
+            numberButtonClick(it)
+        }
+        findViewById<TextView>(R.id.buttonNine).setOnClickListener {
+            numberButtonClick(it)
+        }
+
     }
 
-    fun numberButtonClick(view: View) {
+    private fun numberButtonClick(view: View) {
         // Convert Text to TextView
         val tv = view as TextView
         isDotButtonClicked = false
@@ -48,7 +106,7 @@ class MainActivity : AppCompatActivity() {
         showProcess()
     }
 
-    fun dotButtonClick(view: View) {
+    private fun dotButtonClick(view: View) {
         val tv = view as TextView
         // Prevent multiple dots from being written
         if (isDotButtonClicked) {
@@ -71,7 +129,7 @@ class MainActivity : AppCompatActivity() {
         showProcess()
     }
 
-    fun operatorButtonClick(view: View) {
+    private fun operatorButtonClick(view: View) {
         val tv = view as TextView
         currentInputSB.clear()
         list.add(tv.text.toString())
@@ -80,7 +138,7 @@ class MainActivity : AppCompatActivity() {
         showProcess()
     }
 
-    fun equalButtonClick(view: View) {
+    private fun equalButtonClick(view: View) {
         // Grammar check
         // check `number operator number operator ... number` structure
         // feature: even -> number; odd -> operator; last -> number
@@ -187,7 +245,7 @@ class MainActivity : AppCompatActivity() {
 
     }
 
-    fun backButtonClick(view: View) {
+    private fun backButtonClick(view: View) {
         // determine to withdraw the number or the operator
         if (list.size == 0){
             return
@@ -203,7 +261,7 @@ class MainActivity : AppCompatActivity() {
         showProcess()
     }
 
-    fun clearButtonClick(view: View) {
+    private fun clearButtonClick(view: View) {
         // restore the process and result text view content
         processTextView.text = ""
         resultTextView.text = "0"
@@ -235,7 +293,7 @@ class MainActivity : AppCompatActivity() {
         processTextView.text = str.toString()
     }
 
-    fun toBeDeveloped(view: View) {
+    private fun toBeDeveloped(view: View) {
         val author = getString(R.string.to_be_developed)
         resultTextView.text = author
         Log.v("myTag", "$list")
