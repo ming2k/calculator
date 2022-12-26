@@ -1,5 +1,7 @@
 # 计算器
 
+Android项目
+
 ## Basic
 
 - kotlin: 写逻辑
@@ -7,6 +9,7 @@
 
 about xml:
 这个项目中你需要了解layout布局
+
 ```xml
 <brahbrahLayout xmlns:android="http://schemas.android.com/apk/res/android">
 </brahbrahLayout>
